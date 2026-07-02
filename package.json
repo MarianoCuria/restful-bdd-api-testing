@@ -1,0 +1,24 @@
+{
+  "name": "restful-bdd-api-testing",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test:bdd": "bddgen && playwright test --project=bdd-ui",
+    "test:api": "playwright test --project=api",
+    "test:all": "bddgen && playwright test",
+    "allure:report": "allure generate allure-results --clean -o allure-report && allure open allure-report",
+    "allure:generate": "allure generate allure-results --clean -o allure-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^26.1.0",
+    "allure-commandline": "^2.43.0",
+    "allure-playwright": "^3.10.2",
+    "playwright-bdd": "^9.2.0",
+    "typescript": "^6.0.3"
+  }
+}

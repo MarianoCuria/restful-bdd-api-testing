@@ -1,0 +1,10 @@
+.env
+.env.local
+node_modules/
+dist/
+allure-results/
+allure-report/
+test-results/
+/playwright-report/
+/.auth/
+.features-gen/
