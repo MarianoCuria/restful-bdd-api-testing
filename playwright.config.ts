@@ -1,14 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
-import { defineBddConfig } from 'playwright-bdd';
-
-// BDD config: tells playwright-bdd where to find .feature files and step definitions.
-const bddConfig = defineBddConfig({
-  features: 'features/**/*.feature',
-  steps: ['steps/**/*.ts', 'support/fixtures.ts'],
-});
+import { defineBddProject } from 'playwright-bdd';
 
 export default defineConfig({
-  testDir: bddConfig.outputDir,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
@@ -24,13 +17,38 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'bdd-ui',
-      testDir: bddConfig.outputDir,
+      ...defineBddProject({
+        name: 'bdd-ui',
+        features: [
+          'features/booking/**/*.feature',
+          'features/availability/**/*.feature',
+          'features/contact/**/*.feature',
+        ],
+        steps: [
+          'steps/booking.steps.ts',
+          'steps/availability.steps.ts',
+          'steps/contact.steps.ts',
+          'support/fixtures.ts',
+        ],
+      }),
       use: { ...devices['Desktop Chrome'] },
+      retries: process.env.CI ? 2 : 0,
     },
     {
-      name: 'api',
-      testDir: 'tests/api',
+      ...defineBddProject({
+        name: 'bdd-e2e',
+        features: 'features/e2e/**/*.feature',
+        steps: ['steps/e2e/e2e.steps.ts', 'support/e2e-fixtures.ts'],
+      }),
+      use: { ...devices['Desktop Chrome'] },
+      retries: process.env.CI ? 2 : 0,
+    },
+    {
+      ...defineBddProject({
+        name: 'bdd-api',
+        features: 'features/api/**/*.feature',
+        steps: ['steps/api/**/*.ts', 'support/api-fixtures.ts'],
+      }),
       use: { baseURL: 'https://restful-booker.herokuapp.com' },
     },
   ],

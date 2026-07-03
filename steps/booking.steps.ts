@@ -1,56 +1,68 @@
-import { expect } from 'playwright-bdd';
+import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../support/fixtures';
 
 const { Given, When, Then } = createBdd(test);
 
-Given('the guest is on the hotel homepage', async ({ bookingPage }) => {
-  await bookingPage.goto();
+Given('the guest is on the hotel homepage', async ({ homePage }) => {
+  await homePage.goto();
 });
 
 When(
   'they select a room and fill in their details',
-  async ({ bookingPage }, table: { hashes: () => Array<Record<string, string>> }) => {
+  async ({ homePage, roomPage }, table: { hashes: () => Array<Record<string, string>> }) => {
     const [data] = table.hashes();
-    await bookingPage.selectRoom();
-    await bookingPage.fillBookingForm({
+    await homePage.selectRoom();
+    await roomPage.openBookingForm();
+    await roomPage.fillBookingForm({
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
       phone: data.phone,
-      checkIn: '',
-      checkOut: '',
     });
-    await bookingPage.submitBooking();
+    await roomPage.submitBooking();
   },
 );
 
-Then(
-  'the booking is confirmed with the guest name {string}',
-  async ({ bookingPage }, guestName: string) => {
-    const [firstName, lastName] = guestName.split(' ');
-    await bookingPage.confirmationIsVisible(firstName, lastName);
-  },
-);
-
-When('they try to book a room without providing their email', async ({ bookingPage }) => {
-  await bookingPage.selectRoom();
-  await bookingPage.fillBookingForm({
-    firstName: 'Jane',
-    lastName: 'Smith',
-    email: '',
-    phone: '01234567890',
-    checkIn: '',
-    checkOut: '',
-  });
-  await bookingPage.submitBooking();
+Then('the booking is confirmed', async ({ roomPage }) => {
+  await roomPage.confirmationIsVisible();
 });
+
+When(
+  'they try to book a room without providing their {word}',
+  async ({ homePage, roomPage }, field: string) => {
+    await homePage.selectRoom();
+    await roomPage.openBookingForm();
+    await roomPage.fillBookingForm({
+      firstName: field === 'firstname' ? '' : 'Jane',
+      lastName: field === 'lastname' ? '' : 'Smith',
+      email: field === 'email' ? '' : 'jane@example.com',
+      phone: field === 'phone' ? '' : '01234567890',
+    });
+    await roomPage.submitBooking();
+  },
+);
 
 Then(
   'an error message is shown asking for the missing information',
   async ({ page }) => {
-    await expect(page.getByText(/must not be empty|Email should not be blank/i)).toBeVisible({
-      timeout: 5000,
+    await expect(
+      page.getByText(/must not be empty|should not be blank/i)
+    ).toBeVisible({ timeout: 5000 });
+  },
+);
+
+When(
+  'they select the {word} room and complete the booking',
+  async ({ homePage, roomPage }, roomType: string) => {
+    await homePage.selectRoomByType(roomType);
+    await roomPage.openBookingForm();
+    await roomPage.fillBookingForm({
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john@example.com',
+      phone: '01234567890',
     });
+    await roomPage.submitBooking();
   },
 );
