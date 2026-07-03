@@ -42,10 +42,14 @@ jobs:
 
       - name: Generate Allure report
         if: always()
-        run: npm run allure:generate
+        run: |
+          npm run allure:generate
+          touch allure-report/.nojekyll
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
+        with:
+          enablement: true
 
       - name: Upload Allure report
         uses: actions/upload-pages-artifact@v3
